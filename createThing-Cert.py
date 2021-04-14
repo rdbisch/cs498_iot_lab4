@@ -51,6 +51,11 @@ def createCertificate(thingClient, thingName):
 			principal = certificateArn
 	)
 
+	response = thingClient.add_thing_to_thing_group(
+		thingGroupName = "lab4_thinggroup",
+		thingName = thingName
+	)
+
 	return {
 		thingName:
 			{
