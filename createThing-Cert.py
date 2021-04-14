@@ -1,20 +1,15 @@
 ################################################### Connecting to AWS
 import boto3
-
 import json
 ################################################### Create random name for things
 import random
 import string
 
 ################################################### Parameters for Thing
-thingArn = ''
-thingId = ''
-thingName = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(15)])
-defaultPolicyName = 'GGTest_Group_Core-policy'
+defaultPolicyName = 'lab4_policy'
 ###################################################
 
-def createThing():
-	global thingClient
+def createThing(thingClient, thingName):
 	thingResponse = thingClient.create_thing(
 		thingName = thingName
 	)
@@ -22,14 +17,13 @@ def createThing():
 	for element in data: 
 		if element == 'thingArn': thingArn = data['thingArn']
 		elif element == 'thingId': thingId = data['thingId']
-	createCertificate()
+	return createCertificate(thingClient, thingName)
 
-def createCertificate():
-	global thingClient
+def createCertificate(thingClient, thingName):
 	certResponse = thingClient.create_keys_and_certificate(
 			setAsActive = True
 	)
-	data = json.loads(json.dumps(certResponse, sort_keys=False, indent=4))
+	data = json.loads(json.dumps(certResponse, sort_keys=False, indent=4))	
 	for element in data: 
 			if element == 'certificateArn':
 					certificateArn = data['certificateArn']
@@ -57,5 +51,23 @@ def createCertificate():
 			principal = certificateArn
 	)
 
+	return {
+		thingName:
+			{
+				"certificateArn": certificateArn,
+				"PublicKey": PublicKey,
+				"PrivateKey": PrivateKey,
+				"certificatePem": certificatePem
+			}
+	}
+
 thingClient = boto3.client('iot')
-createThing()
+
+keys = {}
+for i in range(10):
+	thingName = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(15)])
+	keys.update(createThing(thingClient, thingName))
+
+# Save keys in json file for later use
+with open("keys.json", "w") as outfile: 
+    json.dump(keys, outfile)
