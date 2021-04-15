@@ -1,6 +1,7 @@
 ################################################### Connecting to AWS
 import boto3
 import json
+import os
 ################################################### Create random name for things
 import random
 import string
@@ -34,13 +35,6 @@ def createCertificate(thingClient, thingName):
 					certificatePem = data['certificatePem']
 			elif element == 'certificateId':
 					certificateId = data['certificateId']
-							
-	with open('public.key', 'w') as outfile:
-			outfile.write(PublicKey)
-	with open('private.key', 'w') as outfile:
-			outfile.write(PrivateKey)
-	with open('cert.pem', 'w') as outfile:
-			outfile.write(certificatePem)
 
 	response = thingClient.attach_policy(
 			policyName = defaultPolicyName,
@@ -66,13 +60,17 @@ def createCertificate(thingClient, thingName):
 			}
 	}
 
+
+def writeFile(prefix, name, data):
+	with open(prefix+name, "w") as outfile:
+		outfile.write(data)
+
 thingClient = boto3.client('iot')
 
-keys = {}
-for i in range(10):
+for i in range(300):
 	thingName = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(15)])
-	keys.update(createThing(thingClient, thingName))
-
-# Save keys in json file for later use
-with open("keys.json", "w") as outfile: 
-    json.dump(keys, outfile)
+	path = "data/certificates/device_{}/".format(thingName)
+	os.mkdir(path)
+	keys = createThing(thingClient, thingName)[thingName]
+	writeFile(path, "device_{}.certificate.pem".format(thingName), keys["certificatePem"])
+	writeFile(path, "device_{}.private.pem".format(thingName), keys["PrivateKey"])
