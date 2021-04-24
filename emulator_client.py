@@ -11,7 +11,7 @@ from threading import Lock
 #TODO 1: modify the following parameters
 #Starting and end index, modify this
 device_st = 0
-device_end = 3
+device_end = 300
 
 #Path to the dataset, modify this
 data_path = "data/vehicle{}.csv"
