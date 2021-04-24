@@ -67,7 +67,7 @@ def writeFile(prefix, name, data):
 
 thingClient = boto3.client('iot')
 
-for i in range(3):
+for i in range(500):
 	thingName = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(15)])
 	path = "data/certificates/device_{}/".format(i)
 	os.mkdir(path)
